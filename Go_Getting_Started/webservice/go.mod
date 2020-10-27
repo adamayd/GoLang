@@ -1,3 +1,3 @@
-module github.com/adamayd/go-webservice-tutorial
+module github.com/adamayd/webservice
 
 go 1.14
