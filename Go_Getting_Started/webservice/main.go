@@ -1,15 +1,11 @@
 package main
 
 import (
-  "github.com/adamayd/webservice/models"
-  "fmt"
+	"net/http"
+	"github.com/adamayd/webservice/controllers"
 )
 
 func main() {
-  u := models.User{
-    ID: 2,
-    FirstName: "Mike",
-    LastName: "Van Sickle",
-  }
-  fmt.Println(u)
+  controllers.RegisterControllers()
+  http.ListenAndServe(":3000", nil)
 }
