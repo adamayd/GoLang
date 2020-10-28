@@ -1,6 +1,9 @@
 package models
 
-import "fmt"
+import (
+  "fmt"
+  "errors"
+)
 
 type User struct {
   ID int
@@ -43,7 +46,7 @@ func UpdateUser(u User) (User, error) {
       return u, nil
     }
   }
-  return User{}, fmt.Errorf("User with ID '%v' not found", id)
+  return User{}, fmt.Errorf("User with ID '%v' not found", u.ID)
 }
 
 func RemoveUserById(id int) error {
