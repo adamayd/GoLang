@@ -27,7 +27,7 @@ func AddUser(u User) (User, error) {
   return u, nil
 }
 
-func GetUserByID(id int) (User, error) {
+func GetUserById(id int) (User, error) {
   for _, u := range users {
     if u.ID == id {
       return *u, nil
@@ -46,7 +46,7 @@ func UpdateUser(u User) (User, error) {
   return User{}, fmt.Errorf("User with ID '%v' not found", id)
 }
 
-func RemoveUserByID(id int) error {
+func RemoveUserById(id int) error {
   for i, u := range users {
     if u.ID == id {
       users = append(users[:i], users[i+1:]...)
