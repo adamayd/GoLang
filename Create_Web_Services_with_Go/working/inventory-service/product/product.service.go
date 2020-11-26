@@ -5,31 +5,36 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"product/cors"
 	"strconv"
 	"strings"
 )
 
 const productsBasePath = "products"
 
+// SetupRoutes :
 func SetupRoutes(apiBasePath string) {
-	handleProducts := http.HandleFunc(productsHandler)
-	handleProduct := http.HandleFunc(productHandler)
+	handleProducts := http.HandlerFunc(productsHandler)
+	handleProduct := http.HandlerFunc(productHandler)
+	fmt.Println("Setting up the routes")
 	http.Handle(fmt.Sprintf("%s/%s", apiBasePath, productsBasePath), cors.Middleware(handleProducts))
 	http.Handle(fmt.Sprintf("%s/%s/", apiBasePath, productsBasePath), cors.Middleware(handleProduct))
+	fmt.Println("Routes are set up")
 }
 
 func productsHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Hitting the products handler")
 	switch r.Method {
 	case http.MethodGet:
 		// get a list of all products
 		productList := getProductList()
-		productsJson, err := json.Marshal(productList)
+		productsJSON, err := json.Marshal(productList)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
-		w.Write(productsJson)
+		w.Write(productsJSON)
 	case http.MethodPost:
 		// add a new product to the list
 		var newProduct Product
@@ -60,6 +65,7 @@ func productsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func productHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Hitting the single product handler")
 	urlPathSegments := strings.Split(r.URL.Path, "products/")
 	productID, err := strconv.Atoi(urlPathSegments[len(urlPathSegments)-1])
 	if err != nil {

@@ -2,8 +2,7 @@ package main
 
 import (
 	"net/http"
-
-	"github.com/adamayd/GoLang/Create_Web_Services_with_Go/working/inventory-service/product"
+	"product/product"
 )
 
 const apiBasePath = "/api"

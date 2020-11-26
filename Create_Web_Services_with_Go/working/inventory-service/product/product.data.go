@@ -86,22 +86,22 @@ func getNextProductID() int {
 	return productIDs[len(productIDs)-1] + 1
 }
 
-func addOrUpdateProduct(product Product) (int, error) {
+func addOrUpdateProduct(iProduct Product) (int, error) {
 	// if the product id is set, update, otherwise add
 	addOrUpdateID := -1
-	if product.ProductID > 0 {
-		oldProduct := getProduct(product.ProductID)
+	if iProduct.ProductID > 0 {
+		oldProduct := getProduct(iProduct.ProductID)
 		// if it exists, replace it, otherwise return error
 		if oldProduct == nil {
-			return 0, fmt.Errorf("product id [%d] doesn't exist", product.ProductID)
+			return 0, fmt.Errorf("product id [%d] doesn't exist", iProduct.ProductID)
 		}
-		addOrUpdateID = product.ProductID
+		addOrUpdateID = iProduct.ProductID
 	} else {
 		addOrUpdateID = getNextProductID()
-		product.ProductID = addOrUpdateID
+		iProduct.ProductID = addOrUpdateID
 	}
 	productMap.Lock()
-	productMap.m[addOrUpdateID] = product
+	productMap.m[addOrUpdateID] = iProduct
 	productMap.Unlock()
 	return addOrUpdateID, nil
 }

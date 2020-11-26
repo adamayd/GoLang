@@ -1,7 +1,5 @@
 package product
 
-var productList []Product
-
 type Product struct {
 	ProductID      int    `json:"productId"`
 	Manufacturer   string `json:"manufacturer"`
