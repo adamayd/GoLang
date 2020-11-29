@@ -16,14 +16,11 @@ const productsBasePath = "products"
 func SetupRoutes(apiBasePath string) {
 	handleProducts := http.HandlerFunc(productsHandler)
 	handleProduct := http.HandlerFunc(productHandler)
-	fmt.Println("Setting up the routes")
 	http.Handle(fmt.Sprintf("%s/%s", apiBasePath, productsBasePath), cors.Middleware(handleProducts))
 	http.Handle(fmt.Sprintf("%s/%s/", apiBasePath, productsBasePath), cors.Middleware(handleProduct))
-	fmt.Println("Routes are set up")
 }
 
 func productsHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Hitting the products handler")
 	switch r.Method {
 	case http.MethodGet:
 		// get a list of all products
@@ -65,7 +62,6 @@ func productsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func productHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Hitting the single product handler")
 	urlPathSegments := strings.Split(r.URL.Path, "products/")
 	productID, err := strconv.Atoi(urlPathSegments[len(urlPathSegments)-1])
 	if err != nil {
