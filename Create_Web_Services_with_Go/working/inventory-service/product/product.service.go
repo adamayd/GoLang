@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"product/cors"
 	"strconv"
@@ -24,7 +25,11 @@ func productsHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		// get a list of all products
-		productList := getProductList()
+		productList, err := getProductList()
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 		productsJSON, err := json.Marshal(productList)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -68,21 +73,28 @@ func productHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	product := getProduct(productID)
-	if product == nil {
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
 	switch r.Method {
 	case http.MethodGet:
-		// return a single product
-		productJSON, err := json.Marshal(product)
+		product, err := getProduct(productID)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+		if product == nil {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+		productJSON, err := json.Marshal(product)
+		if err != nil {
+			log.Print(err)
+			w.WriteHeader(http.StatusBadRequest)
+		}
 		w.Header().Set("Content-Type", "application/json")
-		w.Write(productJSON)
+		_, err = w.Write(productJSON)
+		if err != nil {
+			log.Fatal(err)
+		}
+
 	case http.MethodPut:
 		// update product in the list
 		var updatedProduct Product
