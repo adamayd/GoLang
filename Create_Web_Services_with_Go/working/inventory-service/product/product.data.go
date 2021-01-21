@@ -123,6 +123,53 @@ func getNextProductID() int {
 	return productIDs[len(productIDs)-1] + 1
 }
 
+func updateProduct(product Product) error {
+	_, err := database.DbConn.Exec(`UPDATE products SET
+		manufacturer=?,
+		sku=?,
+		upc=?,
+		pricePerUnit=CAST(? AS DECIMAL(13,2)),
+		quantityOnHand=?,
+		productName=?
+		WHERE productId=?`,
+		product.Manufacturer,
+		product.Sku,
+		product.Upc,
+		product.PricePerUnit,
+		product.QuantityOnHand,
+		product.ProductName,
+		product.ProductID)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func insertProduct(product Product) (int, error) {
+	result, err := database.DbConn.Exec(`INSERT INTO products
+		(manufacturer,
+		sku,
+		upc,
+		pricePerUnit,
+		quantityOnHand,
+		productName)
+		VALUES (?, ?, ?, ?, ?, ?)`,
+		product.Manufacturer,
+		product.Sku,
+		product.Upc,
+		product.PricePerUnit,
+		product.QuantityOnHand,
+		product.ProductName)
+	if err != nil {
+		return 0, err
+	}
+	insertId, err := result.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+	return int(insertId), nil
+}
+
 func addOrUpdateProduct(iProduct Product) (int, error) {
 	// if the product id is set, update, otherwise add
 	addOrUpdateID := -1
