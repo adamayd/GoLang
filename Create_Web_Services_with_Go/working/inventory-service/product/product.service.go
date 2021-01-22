@@ -6,9 +6,9 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"product/cors"
 	"strconv"
 	"strings"
+	"webservice/cors"
 )
 
 const productsBasePath = "products"

@@ -3,8 +3,8 @@ package product
 import (
 	"context"
 	"database/sql"
-	"product/database"
 	"time"
+	"webservice/database"
 )
 
 func getProduct(productID int) (*Product, error) {
