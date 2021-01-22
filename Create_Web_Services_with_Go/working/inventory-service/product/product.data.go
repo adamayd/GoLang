@@ -2,50 +2,8 @@ package product
 
 import (
 	"database/sql"
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
-	"log"
-	"os"
 	"product/database"
-	"sort"
-	"sync"
 )
-
-var productMap = struct {
-	sync.RWMutex
-	m map[int]Product
-}{m: make(map[int]Product)}
-
-func init() {
-	fmt.Println("loading products...")
-	prodMap, err := loadProductMap()
-	productMap.m = prodMap
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Printf("%d products loaded...\n", len(productMap.m))
-}
-
-func loadProductMap() (map[int]Product, error) {
-	fileName := "products.json"
-	_, err := os.Stat(fileName)
-	if os.IsNotExist(err) {
-		return nil, fmt.Errorf("file [%s] does not exist", fileName)
-	}
-
-	file, _ := ioutil.ReadFile(fileName)
-	productList := make([]Product, 0)
-	err = json.Unmarshal([]byte(file), &productList)
-	if err != nil {
-		log.Fatal(err)
-	}
-	prodMap := make(map[int]Product)
-	for i := 0; i < len(productList); i++ {
-		prodMap[productList[i].ProductID] = productList[i]
-	}
-	return prodMap, nil
-}
 
 func getProduct(productID int) (*Product, error) {
 	row := database.DbConn.QueryRow(`SELECT productId,
@@ -73,10 +31,12 @@ func getProduct(productID int) (*Product, error) {
 	return product, nil
 }
 
-func removeProduct(productID int) {
-	productMap.Lock()
-	defer productMap.Unlock()
-	delete(productMap.m, productID)
+func removeProduct(productID int) error {
+	_, err := database.DbConn.Exec(`DELETE FROM products WHERE productId = ?`, productID)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func getProductList() ([]Product, error) {
@@ -105,22 +65,6 @@ func getProductList() ([]Product, error) {
 		products = append(products, product)
 	}
 	return products, nil
-}
-
-func getProductIds() []int {
-	productMap.RLock()
-	productIds := []int{}
-	for key := range productMap.m {
-		productIds = append(productIds, key)
-	}
-	productMap.RUnlock()
-	sort.Ints(productIds)
-	return productIds
-}
-
-func getNextProductID() int {
-	productIDs := getProductIds()
-	return productIDs[len(productIDs)-1] + 1
 }
 
 func updateProduct(product Product) error {
@@ -168,27 +112,4 @@ func insertProduct(product Product) (int, error) {
 		return 0, err
 	}
 	return int(insertId), nil
-}
-
-func addOrUpdateProduct(iProduct Product) (int, error) {
-	// if the product id is set, update, otherwise add
-	addOrUpdateID := -1
-	if iProduct.ProductID > 0 {
-		oldProduct, err := getProduct(iProduct.ProductID)
-		if err != nil {
-			return addOrUpdateID, err
-		}
-		// if it exists, replace it, otherwise return error
-		if oldProduct == nil {
-			return 0, fmt.Errorf("product id [%d] doesn't exist", iProduct.ProductID)
-		}
-		addOrUpdateID = iProduct.ProductID
-	} else {
-		addOrUpdateID = getNextProductID()
-		iProduct.ProductID = addOrUpdateID
-	}
-	productMap.Lock()
-	productMap.m[addOrUpdateID] = iProduct
-	productMap.Unlock()
-	return addOrUpdateID, nil
 }
